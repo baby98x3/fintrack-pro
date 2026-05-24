@@ -1,289 +1,544 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinTrack Pro - Cloud Live</title>
-    <!-- Tailwind CSS Engine -->
+    <title>FinTrack Pro - Secure UPI Lite Tracker</title>
+    <!-- Tailwind CSS for modern, clean styling -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Supabase Client Engine -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <script>
-        // APNI KEYS DOBARA PASTE KARO BHAI
-        const SUPABASE_URL = "https://vsiarjeutlcammmtfazy.supabase.co"; 
-        const SUPABASE_KEY = "sb_publishable_9Er8UywUojYMt640T7N_Xw_cxIInXl0";
-        let _supabase;
-        
-        try {
-            _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        } catch(e) {
-            console.error("Initialization error:", e);
-        }
-    </script>
     <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .clickable-btn { cursor: pointer !important; pointer-events: auto !important; }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
     </style>
 </head>
 <body class="bg-slate-50 font-sans min-h-screen text-slate-800">
 
-    <!-- ================= AUTHENTICATION BLOCK ================= -->
+    <!-- ================= AUTHENTICATION BLOCK (LOGIN / SIGNUP) ================= -->
     <div id="auth-screen" class="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
         <div class="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 border border-slate-100">
             <div class="text-center mb-8">
-                <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-3 shadow-inner">FT</div>
-                <h2 id="auth-title" class="text-2xl font-extrabold text-slate-900 tracking-tight">FinTrack Cloud Login</h2>
-                <p id="auth-subtitle" class="text-sm text-slate-500 mt-2">Apne financials cloud par access karne ke liye login karein.</p>
+                <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-3 shadow-inner">
+                    FT
+                </div>
+                <h2 id="auth-title" class="text-2xl font-extrabold text-slate-900 tracking-tight">FinTrack Secure Login</h2>
+                <p id="auth-subtitle" class="text-sm text-slate-500 mt-2">Apne financials access karne ke liye login karein.</p>
             </div>
 
-            <!-- Direct standard form submission execution handler -->
+            <!-- Auth Form -->
             <form id="auth-form" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Email ID</label>
-                    <input type="email" id="auth-email" required placeholder="name@domain.com" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                    <label for="auth-username" class="block text-sm font-medium text-slate-700 mb-1">Username</label>
+                    <input type="text" id="auth-username" required placeholder="Enter username" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                    <input type="password" id="auth-password" required placeholder="Min 6 characters" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                    <label for="auth-password" class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                    <input type="password" id="auth-password" required placeholder="Enter password" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
                 </div>
+                
                 <p id="auth-error" class="text-xs text-rose-500 font-medium hidden text-center mt-1"></p>
-                <button type="submit" id="auth-submit-btn" class="clickable-btn w-full bg-indigo-600 text-white py-2.5 px-4 rounded-xl font-medium text-sm hover:bg-indigo-500 transition shadow-sm mt-4">Login</button>
+
+                <button type="submit" id="auth-submit-btn" class="w-full bg-indigo-600 text-white py-2.5 px-4 rounded-xl font-medium text-sm hover:bg-indigo-500 transition shadow-sm cursor-pointer mt-4">
+                    Login
+                </button>
             </form>
 
+            <!-- Toggle System Link -->
             <div class="text-center mt-6 pt-4 border-t border-slate-100">
-                <!-- Changed to dynamic button type to avoid link freeze browser lag -->
-                <button type="button" id="toggle-auth-mode" class="clickable-btn text-xs text-indigo-600 hover:underline font-medium">Naya account banana hai? Sign Up karein</button>
+                <button id="toggle-auth-mode" onclick="toggleAuthMode()" class="text-xs text-indigo-600 hover:underline font-medium cursor-pointer">
+                    Naya account banana hai? Sign Up karein
+                </button>
+            </div>
+            
+            <div class="text-center mt-4 text-[11px] text-slate-400 bg-slate-50 py-1.5 rounded-lg border border-slate-100">
+                💡 Default Login Demo: <span class="font-semibold text-slate-600">admin</span> / Password: <span class="font-semibold text-slate-600">1234</span>
             </div>
         </div>
     </div>
 
-    <!-- ================= MAIN DASHBOARD APPLICATION ================= -->
+    <!-- ================= MAIN WEBSITE APP DASHBOARD (HIDDEN BY DEFAULT) ================= -->
     <div id="app-screen" class="hidden max-w-7xl mx-auto px-4 py-8">
+        <!-- Header -->
         <header class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-200 pb-5">
             <div>
-                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">FinTrack <span class="text-indigo-600 font-medium text-xl">Cloud Live</span></h1>
-                <p class="text-slate-500 mt-1">Welcome, <span id="user-display-name" class="font-semibold text-indigo-600">User</span>! Tera data database se synced hai.</p>
+                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">FinTrack <span class="text-indigo-600 font-medium text-xl">with UPI Lite</span></h1>
+                <p class="text-slate-500 mt-1">Welcome back, <span id="user-display-name" class="font-semibold text-indigo-600">User</span>! Tera encrypted budget board ready hai.</p>
             </div>
             <div class="flex items-center gap-4">
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Cloud Live Synced
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    Account Secure
                 </span>
-                <button type="button" id="logout-btn" class="clickable-btn bg-slate-200 hover:bg-rose-100 hover:text-rose-600 text-slate-700 px-3 py-1.5 rounded-xl text-xs font-semibold transition">Logout 🔓</button>
+                <button onclick="handleLogout()" class="bg-slate-200 hover:bg-rose-100 hover:text-rose-600 text-slate-700 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer">
+                    Logout 🔓
+                </button>
             </div>
         </header>
 
-        <!-- Balance Layout Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-3xl p-6 shadow-md relative overflow-hidden">
-                <p class="text-xs font-medium uppercase tracking-wider text-indigo-100">Bank Account Balance</p>
-                <h3 id="bank-balance-display" class="text-3xl font-black mt-2 tracking-tight">₹0.00</h3>
+        <!-- Dashboard Metrics Summary -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative group">
+                <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Main Bank Balance</p>
+                <h3 id="bank-balance" class="text-3xl font-bold text-slate-900 mt-2">₹0.00</h3>
             </div>
-            <div class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-3xl p-6 shadow-md relative overflow-hidden">
-                <p class="text-xs font-medium uppercase tracking-wider text-teal-100">UPI Lite Wallet</p>
-                <h3 id="lite-balance-display" class="text-3xl font-black mt-2 tracking-tight">₹0.00</h3>
+            <div class="bg-gradient-to-br from-indigo-500 to-indigo-700 p-6 rounded-2xl shadow-md text-white">
+                <p class="text-sm font-medium text-indigo-100 uppercase tracking-wider font-semibold">⚡ UPI Lite Wallet</p>
+                <h3 id="upi-lite-balance" class="text-3xl font-bold text-white mt-2">₹0.00</h3>
             </div>
-            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex items-center justify-around">
-                <button type="button" id="btn-open-income" class="clickable-btn flex flex-col items-center gap-2 p-3 hover:bg-emerald-50 rounded-2xl group transition">
-                    <span class="w-12 h-12 bg-emerald-100 group-hover:bg-emerald-200 text-emerald-600 rounded-full flex items-center justify-center text-xl shadow-sm">💰</span>
-                    <span class="text-xs font-semibold text-slate-600">Money In</span>
-                </button>
-                <button type="button" id="btn-open-expense" class="clickable-btn flex flex-col items-center gap-2 p-3 hover:bg-rose-50 rounded-2xl group transition">
-                    <span class="w-12 h-12 bg-rose-100 group-hover:bg-rose-200 text-rose-600 rounded-full flex items-center justify-center text-xl shadow-sm">💸</span>
-                    <span class="text-xs font-semibold text-slate-600">Kharcha Form</span>
-                </button>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Total Income (Bank)</p>
+                <h3 id="total-income" class="text-3xl font-bold text-emerald-600 mt-2">₹0.00</h3>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Total Expenses (All)</p>
+                <h3 id="total-expense" class="text-3xl font-bold text-rose-600 mt-2">₹0.00</h3>
             </div>
         </div>
 
-        <!-- Passbook Tab -->
-        <div class="w-full bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col">
-            <h3 class="text-lg font-bold text-slate-900 mb-4">📋 Real-Time Cloud Passbook</h3>
-            <div id="history-container" class="space-y-3 max-h-[450px] overflow-y-auto custom-scrollbar pr-1 flex-1"></div>
-        </div>
-    </div>
-
-    <!-- ================= TRANSACTION MODAL POPUP ================= -->
-    <div id="transaction-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center px-4 z-50">
-        <div class="bg-white max-w-md w-full rounded-3xl shadow-2xl p-6 border border-slate-100 relative">
-            <button type="button" id="btn-close-modal" class="clickable-btn absolute right-4 top-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 font-bold transition text-sm">✕</button>
-            <h3 id="modal-title" class="text-xl font-extrabold text-slate-900 mb-4">Transaction Entry</h3>
-            <form id="tx-form" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Amount (₹)</label>
-                    <input type="number" id="tx-amount" required min="1" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
-                </div>
-                <div>
-                    <label id="wallet-label" class="block text-xs font-semibold text-slate-600 mb-1">Kahan action apply karein?</label>
-                    <select id="tx-source" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm bg-white">
-                        <option value="lite">⚡ UPI Lite Wallet</option>
-                        <option value="bank">🏦 Bank Account</option>
-                    </select>
-                </div>
-                <div id="category-selector-block">
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Category</label>
-                    <select id="tx-category" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm bg-white">
-                        <option value="Movie">🎬 Movie / Cinema</option>
-                        <option value="Food">🍔 Food / Restaurants</option>
-                        <option value="Travel">🚗 Fuel / Travel</option>
-                        <option value="Shopping">🛍️ Shopping</option>
-                        <option value="Bills">📱 Mobile / Recharge / Bills</option>
-                        <option value="Others">🧩 Others</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Notes / Narration</label>
-                    <input type="text" id="tx-detail" placeholder="Kahan kharch kiya" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
-                </div>
-                <button type="submit" class="clickable-btn w-full bg-indigo-600 text-white py-2.5 px-4 rounded-xl font-semibold text-sm hover:bg-indigo-500 transition shadow-sm mt-2">Save to Cloud</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- ================= HARDWARE-LEVEL EVENT LISTENERS BINDING ================= -->
-    <script>
-        let isSignUpMode = false;
-        let sessionUser = null;
-        let localState = { bank: 5000, lite: 1000, logs: [] };
-        let currentMode = 'expense';
-
-        // Direct standard event listener architecture instead of raw global inline strings
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('auth-form').addEventListener('submit', handleAuthSubmit);
-            document.getElementById('toggle-auth-mode').addEventListener('click', toggleAuthMode);
-            document.getElementById('logout-btn').addEventListener('click', handleLogout);
-            document.getElementById('btn-open-income').addEventListener('click', () => openTransactionModal('income'));
-            document.getElementById('btn-open-expense').addEventListener('click', () => openTransactionModal('expense'));
-            document.getElementById('btn-close-modal').addEventListener('click', closeTransactionModal);
-            document.getElementById('tx-form').addEventListener('submit', handleTransactionSubmit);
-        });
-
-        async function handleAuthSubmit(e) {
-            e.preventDefault();
-            const email = document.getElementById('auth-email').value.trim();
-            const password = document.getElementById('auth-password').value;
-            const err = document.getElementById('auth-error');
-            err.classList.add('hidden');
-
-            if(!_supabase) return alert("Supabase server engine initializes properly nahi hua bhai!");
-
-            if(isSignUpMode) {
-                const { data, error } = await _supabase.auth.signUp({ email, password });
-                if(error) { err.innerText = "❌ " + error.message; err.classList.remove('hidden'); return; }
-                alert("🎉 Cloud Account Created! Ab direct login karein.");
-                toggleAuthMode();
-            } else {
-                const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-                if(error) { err.innerText = "❌ " + error.message; err.classList.remove('hidden'); return; }
-                sessionUser = data.user;
-                await syncUserDataEngine();
-                launchAppDashboard();
-            }
-        }
-
-        function toggleAuthMode() {
-            isSignUpMode = !isSignUpMode;
-            document.getElementById('auth-title').innerText = isSignUpMode ? "Naya FinTrack Cloud" : "FinTrack Cloud Login";
-            document.getElementById('auth-submit-btn').innerText = isSignUpMode ? "Register Cloud System" : "Login";
-            document.getElementById('toggle-auth-mode').innerText = isSignUpMode ? "Account bana hai? Login karein" : "Naya account banana hai? Sign Up karein";
-        }
-
-        function launchAppDashboard() {
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('app-screen').classList.remove('hidden');
-            document.getElementById('user-display-name').innerText = sessionUser.email.split('@')[0];
-            renderUIState();
-        }
-
-        async function syncUserDataEngine() {
-            let localCache = localStorage.getItem('ft_cloud_' + sessionUser.id);
-            if(localCache) {
-                localState = JSON.parse(localCache);
-            } else {
-                localState = { bank: 10000, lite: 2000, logs: [] };
-                localStorage.setItem('ft_cloud_' + sessionUser.id, JSON.stringify(localState));
-            }
-        }
-
-        function renderUIState() {
-            document.getElementById('bank-balance-display').innerText = `₹${localState.bank.toFixed(2)}`;
-            document.getElementById('lite-balance-display').innerText = `₹${localState.lite.toFixed(2)}`;
-
-            const container = document.getElementById('history-container');
-            container.innerHTML = localState.logs.length === 0 ? `<div class="text-center py-8 text-slate-400 text-sm">Cloud ledger empty.</div>` : '';
-
-            const categoryTotals = { "Movie": 0, "Food": 0, "Travel": 0, "Shopping": 0, "Bills": 0, "Others": 0 };
-
-            localState.logs.forEach(item => {
-                const isExp = item.type === 'Kharcha';
-                const div = document.createElement('div');
-                div.className = `flex items-center justify-between p-3 rounded-2xl border ${isExp ? 'bg-rose-50/40 border-rose-100/60' : 'bg-emerald-50/40 border-emerald-100/60'}`;
-                div.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg ${isExp ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}">${isExp ? '📉' : '📈'}</div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Add Transaction & UPI Lite Topup -->
+            <div class="lg:col-span-1 space-y-6">
+                
+                <!-- Transaction Entry Form -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h2 class="text-lg font-bold text-slate-900 mb-4">Naya Transaction Add Karein</h2>
+                    <form id="transaction-form" class="space-y-4">
                         <div>
-                            <p class="text-sm font-bold text-slate-900">${item.detail} <span class="text-xs font-normal text-slate-400">(${item.source === 'bank' ? '🏦 Bank' : '⚡ Lite'})</span></p>
-                            <p class="text-xs text-slate-500 font-medium">${item.category}</p>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Transaction Type</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="border border-slate-200 rounded-lg p-3 flex items-center justify-center gap-2 cursor-pointer has-[:checked]:border-rose-500 has-[:checked]:bg-rose-50/50 transition">
+                                    <input type="radio" name="type" value="expense" checked class="accent-rose-600" onchange="toggleFormOptions()">
+                                    <span class="text-sm font-medium text-slate-700">Kharcha (Expense)</span>
+                                </label>
+                                <label class="border border-slate-200 rounded-lg p-3 flex items-center justify-center gap-2 cursor-pointer has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50/50 transition">
+                                    <input type="radio" name="type" value="income" class="accent-emerald-600" onchange="toggleFormOptions()">
+                                    <span class="text-sm font-medium text-slate-700">Kamai / Balance Add</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Pay Via Selection (Only for expenses) -->
+                        <div id="payment-source-container">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Kahan se pay kiya?</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="border border-slate-200 rounded-lg p-2 flex items-center justify-center gap-2 cursor-pointer has-[:checked]:border-slate-900 has-[:checked]:bg-slate-50 transition">
+                                    <input type="radio" name="source" value="bank" checked class="accent-slate-900">
+                                    <span class="text-xs font-medium text-slate-700">Bank Account</span>
+                                </label>
+                                <label class="border border-slate-200 rounded-lg p-2 flex items-center justify-center gap-2 cursor-pointer has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50/50 transition">
+                                    <input type="radio" name="source" value="upilite" class="accent-indigo-600">
+                                    <span class="text-xs font-medium text-slate-700">⚡ UPI Lite</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-slate-700 mb-1">Description / Naam</label>
+                            <input type="text" id="description" required placeholder="e.g., Opening Balance, Salary, Pocket Money" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label for="amount" class="block text-sm font-medium text-slate-700 mb-1">Amount (₹)</label>
+                                <input type="number" id="amount" step="any" required placeholder="0" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                            </div>
+                            <div>
+                                <label for="category" class="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                                <select id="category" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white">
+                                    <option value="Initial Balance">Initial Balance Setup</option>
+                                    <option value="Salary">Salary</option>
+                                    <option value="Food & Chai">Food & Chai</option>
+                                    <option value="Groceries">Groceries</option>
+                                    <option value="Travel/Auto">Travel/Auto</option>
+                                    <option value="Bills & Rent">Bills & Rent</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="date" class="block text-sm font-medium text-slate-700 mb-1">Date</label>
+                            <input type="date" id="date" required class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        </div>
+
+                        <button type="submit" class="w-full bg-slate-900 text-white py-2.5 px-4 rounded-lg font-medium text-sm hover:bg-slate-800 transition shadow-sm cursor-pointer">
+                            Data Save Karein
+                        </button>
+                    </form>
+                </div>
+
+                <!-- UPI Lite Fund Manager (Load Money) -->
+                <div class="bg-gradient-to-br from-indigo-900 to-slate-900 p-6 rounded-2xl shadow-md text-white">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xl">⚡</span>
+                        <h2 class="text-lg font-bold">UPI Lite: Money Load Karein</h2>
+                    </div>
+                    <p class="text-xs text-indigo-200 mb-4">Apne Bank Account se UPI Lite wallet mein money transfer karein (Max limit ₹2000).</p>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="lite-load-amount" class="block text-xs font-medium text-indigo-200 mb-1">Kitne paise load karne hain? (₹)</label>
+                            <input type="number" id="lite-load-amount" placeholder="e.g., 200, 500" class="w-full px-3 py-2 bg-indigo-950/60 border border-indigo-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm text-white placeholder-indigo-400">
+                        </div>
+                        <button onclick="loadMoneyToUPILite()" class="w-full bg-indigo-500 hover:bg-indigo-400 text-white py-2 px-4 rounded-lg text-xs font-semibold transition cursor-pointer shadow-sm">
+                            Bank Se UPI Lite Me Add Karein
+                        </button>
+                        <p id="lite-error" class="text-xs text-rose-300 hidden mt-1"></p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Ledger Log and Filters -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col h-[670px]">
+                    <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <h2 class="text-lg font-bold text-slate-900">Passbook / History</h2>
+                        
+                        <div class="flex items-center gap-2">
+                            <select id="filter-type" class="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-medium bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="all">Sari Transactions</option>
+                                <option value="bank_expense">Bank Se Kiye Kharche</option>
+                                <option value="lite_expense">UPI Lite Se Kiye Kharche</option>
+                                <option value="income">Income / Added Balance</option>
+                                <option value="lite_load">UPI Lite Load History</option>
+                            </select>
                         </div>
                     </div>
-                    <p class="text-sm font-black ${isExp ? 'text-rose-600' : 'text-emerald-600'}">${isExp ? '-' : '+'}₹${Number(item.amount).toFixed(2)}</p>
-                `;
-                container.appendChild(div);
 
-                if(isExp && categoryTotals[item.category] !== undefined) {
-                    categoryTotals[item.category] += Number(item.amount);
-                }
-            });
+                    <!-- Ledger Wrapper -->
+                    <div id="transaction-list" class="p-6 overflow-y-auto flex-1 custom-scrollbar space-y-3">
+                        <!-- Items dynamically added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            if(localState.logs.length > 0 && Object.values(categoryTotals).some(v => v > 0)) {
-                const summary = document.createElement('div');
-                summary.className = "mt-6 pt-4 border-t-2 border-dashed border-slate-200 bg-slate-50 p-4 rounded-2xl space-y-2";
-                let html = `<p class="text-xs font-extrabold text-indigo-900 uppercase tracking-wider mb-2">📊 Category Expenses (Live Cloud Sync):</p>`;
-                for (const [cat, sum] of Object.entries(categoryTotals)) {
-                    if(sum > 0) html += `<div class="flex justify-between text-xs font-semibold text-slate-600"><span>🔹 ${cat}:</span><span class="text-slate-900 font-bold">₹${sum.toFixed(2)}</span></div>`;
-                }
-                summary.innerHTML = html;
-                container.appendChild(summary);
-            }
-            localStorage.setItem('ft_cloud_' + sessionUser.id, JSON.stringify(localState));
-        }
+    <!-- Application Core Engine JavaScript -->
+    <script>
+        // AUTHENTICATION LOGIC MANAGEMENT
+        let currentAuthMode = 'login'; 
+        let currentUser = localStorage.getItem('fintrack_session_user') || null;
 
-        function openTransactionModal(mode) {
-            currentMode = mode;
-            document.getElementById('transaction-modal').classList.remove('hidden');
-            document.getElementById('modal-title').innerText = mode === 'income' ? "💰 Money In (Cloud Sync)" : "💸 Kharcha Form (Cloud Sync)";
-            document.getElementById('category-selector-block').style.display = mode === 'income' ? 'none' : 'block';
-        }
+        // UI Core Components Pointers
+        const authScreen = document.getElementById('auth-screen');
+        const appScreen = document.getElementById('app-screen');
+        const authForm = document.getElementById('auth-form');
+        const authTitle = document.getElementById('auth-title');
+        const authSubtitle = document.getElementById('auth-subtitle');
+        const authSubmitBtn = document.getElementById('auth-submit-btn');
+        const authError = document.getElementById('auth-error');
+        const toggleAuthLink = document.getElementById('toggle-auth-mode');
+        const userDisplayName = document.getElementById('user-display-name');
 
-        function closeTransactionModal() { document.getElementById('transaction-modal').classList.add('hidden'); }
+        // Expense Tracker State Context Variables
+        let transactions = [];
+        let upiLiteWallet = 0.00;
 
-        function handleTransactionSubmit(e) {
-            e.preventDefault();
-            const amount = Number(document.getElementById('tx-amount').value);
-            const source = document.getElementById('tx-source').value;
-            const detail = document.getElementById('tx-detail').value.trim() || 'Transaction Entries';
-            const category = currentMode === 'income' ? 'Deposit' : document.getElementById('tx-category').value;
+        // DOM Pointers for App Layout
+        const form = document.getElementById('transaction-form');
+        const descInput = document.getElementById('description');
+        const amountInput = document.getElementById('amount');
+        const categoryInput = document.getElementById('category');
+        const dateInput = document.getElementById('date');
+        const transactionList = document.getElementById('transaction-list');
+        const bankDisplay = document.getElementById('bank-balance');
+        const liteDisplay = document.getElementById('upi-lite-balance');
+        const incomeDisplay = document.getElementById('total-income');
+        const expenseDisplay = document.getElementById('total-expense');
+        const filterType = document.getElementById('filter-type');
+        const paymentSourceContainer = document.getElementById('payment-source-container');
+        const liteLoadAmountInput = document.getElementById('lite-load-amount');
+        const liteErrorText = document.getElementById('lite-error');
 
-            if(currentMode === 'expense') {
-                if(source === 'bank' && amount > localState.bank) return alert("Bank Account empty!");
-                if(source === 'lite' && amount > localState.lite) return alert("UPI Lite empty!");
-                localState[source] -= amount;
+        // Toggle Auth View states (Login vs Register)
+        function toggleAuthMode() {
+            authError.classList.add('hidden');
+            if (currentAuthMode === 'login') {
+                currentAuthMode = 'signup';
+                authTitle.innerText = "Create New Account";
+                authSubtitle.innerText = "Naye configuration credentials setup karein.";
+                authSubmitBtn.innerText = "Register Account";
+                toggleAuthLink.innerText = "Pehle se account hai? Login karein";
             } else {
-                localState[source] += amount;
+                currentAuthMode = 'login';
+                authTitle.innerText = "FinTrack Secure Login";
+                authSubtitle.innerText = "Apne financials access karne ke liye login karein.";
+                authSubmitBtn.innerText = "Login";
+                toggleAuthLink.innerText = "Naya account banana hai? Sign Up karein";
+            }
+            authForm.reset();
+        }
+
+        // Auth Form Interceptor Form Listener
+        authForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('auth-username').value.trim().toLowerCase();
+            const password = document.getElementById('auth-password').value;
+            authError.classList.add('hidden');
+
+            let usersDatabase = JSON.parse(localStorage.getItem('fintrack_users_db')) || { "admin": "1234" };
+
+            if (currentAuthMode === 'signup') {
+                if (usersDatabase[username]) {
+                    showAuthError("Yeh username pehle se exist karta hai!");
+                    return;
+                }
+                usersDatabase[username] = password;
+                localStorage.setItem('fintrack_users_db', JSON.stringify(usersDatabase));
+                alert("Account successfully created! Ab aap login kar sakte hain.");
+                toggleAuthMode();
+            } else {
+                if (usersDatabase[username] && usersDatabase[username] === password) {
+                    currentUser = username;
+                    localStorage.setItem('fintrack_session_user', username);
+                    initApplicationFlow();
+                } else {
+                    showAuthError("Invalid username ya password!");
+                }
+            }
+        });
+
+        function showAuthError(msg) {
+            authError.innerText = msg;
+            authError.classList.remove('hidden');
+        }
+
+        // Application Ignition / Loader Flow
+        function initApplicationFlow() {
+            if (!currentUser) {
+                authScreen.classList.remove('hidden');
+                appScreen.classList.add('hidden');
+                return;
             }
 
-            localState.logs.unshift({ type: currentMode === 'income' ? 'Kamaai' : 'Kharcha', amount, category, detail, source });
-            closeTransactionModal();
-            renderUIState();
+            authScreen.classList.add('hidden');
+            appScreen.classList.remove('hidden');
+            userDisplayName.innerText = currentUser.toUpperCase();
+
+            transactions = JSON.parse(localStorage.getItem(`ft_${currentUser}_txs`)) || [];
+            upiLiteWallet = parseFloat(localStorage.getItem(`ft_${currentUser}_lite`)) || 0.00;
+
+            dateInput.value = new Date().toISOString().split('T')[0];
+
+            calculateCalculations();
+            renderLedgerStream();
+            toggleFormOptions();
         }
 
         function handleLogout() {
-            sessionUser = null;
-            document.getElementById('app-screen').classList.add('hidden');
-            document.getElementById('auth-screen').classList.remove('hidden');
+            localStorage.removeItem('fintrack_session_user');
+            currentUser = null;
+            authForm.reset();
+            currentAuthMode = 'login';
+            authScreen.classList.remove('hidden');
+            appScreen.classList.add('hidden');
         }
+
+        // ================= TRACKER MODULE CORE ARCHITECTURE =================
+
+        function formatCurrency(val) {
+            return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
+        }
+
+        function toggleFormOptions() {
+            const selectedType = document.querySelector('input[name="type"]:checked').value;
+            paymentSourceContainer.style.display = selectedType === 'income' ? 'none' : 'block';
+            
+            // Auto adjustment for smart category picking
+            if(selectedType === 'income') {
+                categoryInput.value = "Initial Balance";
+            } else {
+                categoryInput.value = "Food & Chai";
+            }
+        }
+
+        function calculateCalculations() {
+            const totalIncome = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+            const bankExpenses = transactions.filter(t => t.type === 'expense' && t.source === 'bank').reduce((s, t) => s + t.amount, 0);
+            const totalLiteLoads = transactions.filter(t => t.type === 'lite_load').reduce((s, t) => s + t.amount, 0);
+            const totalAllExpenses = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+
+            // True Formula Matrix
+            const actualBankBalance = totalIncome - bankExpenses - totalLiteLoads;
+
+            bankDisplay.innerText = formatCurrency(actualBankBalance);
+            liteDisplay.innerText = formatCurrency(upiLiteWallet);
+            incomeDisplay.innerText = formatCurrency(totalIncome);
+            expenseDisplay.innerText = formatCurrency(totalAllExpenses);
+
+            bankDisplay.className = actualBankBalance < 0 ? "text-3xl font-bold text-rose-600 mt-2" : "text-3xl font-bold text-slate-900 mt-2";
+        }
+
+        function loadMoneyToUPILite() {
+            const value = parseFloat(liteLoadAmountInput.value);
+            liteErrorText.classList.add('hidden');
+
+            if (isNaN(value) || value <= 0) {
+                showLiteError("Kripya sahi amount dalein.");
+                return;
+            }
+            if ((upiLiteWallet + value) > 2000) {
+                showLiteError("UPI Lite Wallet ki limit ₹2,000 se zyada nahi ho sakti.");
+                return;
+            }
+
+            const totalIncome = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+            const bankExpenses = transactions.filter(t => t.type === 'expense' && t.source === 'bank').reduce((s, t) => s + t.amount, 0);
+            const totalLiteLoads = transactions.filter(t => t.type === 'lite_load').reduce((s, t) => s + t.amount, 0);
+            const currentBankBalance = totalIncome - bankExpenses - totalLiteLoads;
+
+            if (value > currentBankBalance) {
+                showLiteError("Main Bank Account mein paise kam hain! Pehle Naya Transaction form se Kamai/Balance add karein.");
+                return;
+            }
+
+            upiLiteWallet += value;
+            transactions.push({
+                id: crypto.randomUUID(),
+                description: "Loaded into UPI Lite Wallet ⚡",
+                amount: value,
+                category: "Wallet Transfer",
+                date: new Date().toISOString().split('T')[0],
+                type: "lite_load",
+                source: "bank"
+            });
+
+            liteLoadAmountInput.value = '';
+            commitStateChanges();
+        }
+
+        function showLiteError(msg) {
+            liteErrorText.innerText = msg;
+            liteErrorText.classList.remove('hidden');
+        }
+
+        function renderLedgerStream() {
+            const selectedFilter = filterType.value;
+            transactionList.innerHTML = '';
+
+            const filteredData = transactions.filter(t => {
+                if (selectedFilter === 'all') return true;
+                if (selectedFilter === 'income') return t.type === 'income';
+                if (selectedFilter === 'lite_load') return t.type === 'lite_load';
+                if (selectedFilter === 'bank_expense') return t.type === 'expense' && t.source === 'bank';
+                if (selectedFilter === 'lite_expense') return t.type === 'expense' && t.source === 'upilite';
+                return true;
+            });
+
+            if (filteredData.length === 0) {
+                transactionList.innerHTML = `<div class="text-center py-12 text-slate-400"><p class="text-sm italic">Koi record nahi mila.</p></div>`;
+                return;
+            }
+
+            filteredData.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(t => {
+                const row = document.createElement('div');
+                let dotColor = 'bg-slate-400'; let mathSign = ''; let priceColor = 'text-slate-600';
+                let tagDetails = t.source === 'upilite' ? '⚡ UPI Lite' : '🏛️ Bank';
+
+                if (t.type === 'expense') { 
+                    dotColor = t.source === 'upilite' ? 'bg-indigo-500' : 'bg-rose-500'; mathSign = '-'; priceColor = 'text-rose-600'; 
+                } else if (t.type === 'income') { 
+                    dotColor = 'bg-emerald-500'; mathSign = '+'; priceColor = 'text-emerald-600'; tagDetails = '🏛️ Bank Account';
+                } else if (t.type === 'lite_load') {
+                    dotColor = 'bg-indigo-600'; mathSign = '→'; priceColor = 'text-indigo-600'; tagDetails = 'Bank to Lite';
+                }
+
+                row.className = `flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100/80 border border-slate-100 rounded-xl transition group`;
+                row.innerHTML = `
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-2.5 h-2.5 rounded-full shrink-0 ${dotColor}"></div>
+                        <div class="min-w-0">
+                            <p class="font-semibold text-slate-900 text-sm truncate">${escapeHTML(t.description)}</p>
+                            <div class="flex items-center gap-2 mt-0.5 text-xs text-slate-400">
+                                <span class="bg-slate-200/60 px-1.5 py-0.5 rounded text-[10px] font-medium uppercase text-slate-600">${tagDetails}</span>
+                                <span>•</span> <span>${t.category || 'General'}</span> • <span>${friendlyDate(t.date)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 ml-4 shrink-0">
+                        <span class="font-bold text-sm ${priceColor}">${mathSign}${formatCurrency(t.amount)}</span>
+                        <button onclick="deleteRecord('${t.id}')" class="text-slate-400 hover:text-rose-600 p-1 rounded-md hover:bg-white border border-transparent hover:border-slate-200 transition opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                    </div>
+                `;
+                transactionList.appendChild(row);
+            });
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const transactionType = document.querySelector('input[name="type"]:checked').value;
+            const expenseSource = document.querySelector('input[name="source"]:checked').value;
+            const enteredAmount = parseFloat(amountInput.value);
+
+            if (isNaN(enteredAmount) || enteredAmount <= 0) {
+                alert("Kripya sahi amount enter karein.");
+                return;
+            }
+
+            if (transactionType === 'expense' && expenseSource === 'upilite') {
+                if (enteredAmount > upiLiteWallet) {
+                    alert("UPI Lite Wallet mein paise nahi hain! Pehle wallet load karein.");
+                    return;
+                }
+                upiLiteWallet -= enteredAmount;
+            }
+
+            transactions.push({
+                id: crypto.randomUUID(),
+                description: descInput.value.trim(),
+                amount: enteredAmount,
+                category: transactionType === 'income' ? categoryInput.value : categoryInput.value,
+                date: dateInput.value,
+                type: transactionType,
+                source: transactionType === 'income' ? 'bank' : expenseSource
+            });
+
+            descInput.value = ''; amountInput.value = '';
+            dateInput.value = new Date().toISOString().split('T')[0];
+            commitStateChanges();
+            toggleFormOptions();
+            descInput.focus();
+        });
+
+        function deleteRecord(id) {
+            const match = transactions.find(t => t.id === id);
+            if (match) {
+                if (match.type === 'lite_load') upiLiteWallet -= match.amount;
+                if (match.type === 'expense' && match.source === 'upilite') upiLiteWallet += match.amount;
+            }
+            transactions = transactions.filter(t => t.id !== id);
+            commitStateChanges();
+        }
+
+        function commitStateChanges() {
+            localStorage.setItem(`ft_${currentUser}_txs`, JSON.stringify(transactions));
+            localStorage.setItem(`ft_${currentUser}_lite`, upiLiteWallet.toString());
+            calculateCalculations();
+            renderLedgerStream();
+        }
+
+        filterType.addEventListener('change', renderLedgerStream);
+        function escapeHTML(str) { return str.replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t)); }
+        function friendlyDate(dStr) { return new Date(dStr.replace(/-/g, '\/')).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }); }
+
+        // Ignition Execution
+        initApplicationFlow();
     </script>
 </body>
 </html>
